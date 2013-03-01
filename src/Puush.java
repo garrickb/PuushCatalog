@@ -24,7 +24,7 @@ abstract class Puush {
     {
         ID[ID.length - 1]++;
         for(int i = ID.length - 1; i > 0; i --)
-            if(ID[i] == 62 && i != 0) {
+            if(ID[i] >= 62 && i != 0) {
                 ID[i-1]++;
                 ID[i] = 0;
             }
@@ -35,7 +35,7 @@ abstract class Puush {
     {
        ID[ID.length - 1]++;
         for(int i = ID.length; i > 0; i --)
-            if(ID[i] == 62 && i != 0) {
+            if(ID[i] >= 62 && i != 0) {
                 ID[i-1]++;
                 ID[i] = 0;
             }
@@ -63,12 +63,10 @@ abstract class Puush {
 
     public static String encode(int[] ints)
     {
-        ArrayList<Character> array = new ArrayList<Character>();
-        for(int i : ints)
-            array.add(encode(i));
         String s = "";
-        for(Character c : array)
-            s+=c;
+        for(int i : ints)
+            s += encode(i);
+
         return s;
     }
 

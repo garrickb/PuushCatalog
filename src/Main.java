@@ -22,14 +22,14 @@ public class Main extends Container {
     private static PuushList pl;
 
     public static void main(String[] args) {
-        int fetchNum = 100;
+        int fetchNum = 10000;
         Main m = new Main();
         JFrame frame = new JFrame("Main");
         frame.setContentPane(m.panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        Puush starter = new ImagePuush("a8fdj");
+        Puush starter = new ImagePuush("192ajs");
         Puush temp = starter;
         pl = new PuushList();
         for (int i = 0; i < fetchNum; i++)
