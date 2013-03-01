@@ -1,7 +1,7 @@
-public abstract class Puush implements IPuush {
-    public final String NAME;
+abstract class Puush implements IPuush {
+    public final String URL;
 
-    public Puush(String name) {
-        this.NAME = name;
+    public Puush(String url) {
+        this.URL = url;
     }
 }

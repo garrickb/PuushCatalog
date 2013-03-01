@@ -2,8 +2,8 @@ import javax.swing.*;
 
 public class MiscPuush extends Puush {
 
-    public MiscPuush(String name) {
-        super(name);
+    public MiscPuush(String url) {
+        super(url);
     }
 
     @Override
