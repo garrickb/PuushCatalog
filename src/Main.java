@@ -4,6 +4,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.MalformedURLException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,30 +22,18 @@ public class Main extends Container {
     private static int i = 0;
     private static PuushList pl;
 
-    public static void main(String[] args) {
-        int fetchNum = 10000;
+    public static void main(String[] args) throws MalformedURLException {
+        int fetchNum = 5;
         Main m = new Main();
         JFrame frame = new JFrame("Main");
         frame.setContentPane(m.panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        Puush starter = new ImagePuush("192ajs");
-        Puush temp = starter;
-        pl = new PuushList();
-        for (int i = 0; i < fetchNum; i++)
-        {
-            starter = new ImagePuush(starter.getNext());
-            pl.add(starter);
-        }
+        Puush starter = new Puush("abcdE");
+        pl = new PuushList(starter, fetchNum);
+
         m.refresh();
-        System.out.println();
-        for (int i : pl.get(0).getID())
-            System.out.print(i + " ");
-        System.out.println();
-        for (int i : pl.get(0).getNext())
-            System.out.print(i + " ");
-        System.out.println(Puush.encode(pl.get(0).getNext()));
     }
 
     private void refresh() {
