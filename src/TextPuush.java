@@ -7,7 +7,6 @@ public class TextPuush extends Puush {
         super(url);
     }
 
-    @Override
     public JPanel fetch()
     {
         return null;

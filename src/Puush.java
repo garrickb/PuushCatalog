@@ -1,7 +1,7 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-abstract class Puush implements IPuush {
+abstract class Puush {
+    final String PUUSH_URL = "puu.sh/";
     public final String URL;
     private static int numPuushs = 0;
     private final int[] ID;
@@ -46,8 +46,11 @@ abstract class Puush implements IPuush {
     {
         ArrayList<Integer> array = new ArrayList<Integer>();
         for(Character c : s.toCharArray())
-            array.add(decode(c));           //TODO
-       return array.toArray(new Integer[array.size()]);
+            array.add(decode(c));
+        int[] returnArray = new int[array.size()];
+        for(int i = 0; i < array.size(); i ++)
+            returnArray[i] = array.get(0);
+       return returnArray;
     }
 
     public static int decode(Character c)

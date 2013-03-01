@@ -13,7 +13,6 @@ public class ImagePuush extends Puush {
         super(id);
     }
 
-    @Override
     public JPanel fetch()
     {
         return null;

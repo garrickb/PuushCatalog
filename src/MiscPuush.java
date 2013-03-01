@@ -7,7 +7,6 @@ public class MiscPuush extends Puush {
         super(url);
     }
 
-    @Override
     public JPanel fetch()
     {
         return null;
