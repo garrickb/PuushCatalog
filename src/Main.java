@@ -19,6 +19,15 @@ public class Main extends Container {
     private JButton refreshButton;
     private JPanel pictureContainer;
 
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Main");
+        frame.setContentPane(new Main().panel1);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+        PuushList pl = new PuushList();
+    }
+
     public Main() {
         refreshButton.addActionListener(new ActionListener() {
             @Override
@@ -44,13 +53,5 @@ public class Main extends Container {
                 System.out.println("Selected: " + list.getSelectedValue());
             }
         });
-    }
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Main");
-        frame.setContentPane(new Main().panel1);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
     }
 }
