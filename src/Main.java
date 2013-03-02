@@ -23,23 +23,36 @@ public class Main extends Container {
     private static PuushList pl;
 
     public static void main(String[] args) throws MalformedURLException {
-        int fetchNum = 1000;
         Main m = new Main();
-        JFrame frame = new JFrame("Main");
+        JFrame frame = new JFrame("Puush Catalog");
         frame.setContentPane(m.panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        Puush starter = new Puush("aBcD23");
-        Puush starter2 = starter.getNext();
-        pl = new PuushList(starter, fetchNum);
 
-        m.refresh();
+        pl = new PuushList(null, 0);
     }
 
-    private void refresh() {
-        list.setListData(pl.toArray());
-        list.setSelectedIndex(0);
+    private void refresh() throws MalformedURLException {
+        JTextField url = new JTextField(5);
+        SpinnerModel sm = new SpinnerNumberModel(0, 0, 1000, 5);
+        JSpinner fetchNum = new JSpinner(sm);
+        fetchNum.setPreferredSize(new Dimension(50, 22));
+
+        JPanel myPanel = new JPanel();
+        myPanel.add(new JLabel("Puush URL:"));
+        myPanel.add(url);
+        myPanel.add(Box.createHorizontalStrut(15));
+        myPanel.add(new JLabel("Amount to fetch:"));
+        myPanel.add(fetchNum);
+
+        int result = JOptionPane.showConfirmDialog(null, myPanel,
+                "Refresh Catalog", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION && (Integer)fetchNum.getValue() >= 0) {
+            pl = new PuushList(new Puush(url.getText()), (Integer)fetchNum.getValue());
+            list.setListData(pl.toArray());
+            list.setSelectedIndex(0);
+        }
     }
 
     public Puush getSelectedPuush() {
@@ -51,7 +64,11 @@ public class Main extends Container {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Refresh clicked.");
-                refresh();
+                try {
+                    refresh();
+                } catch (MalformedURLException e1) {
+                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
             }
         });
         pictureBeHereButton.addActionListener(new ActionListener() {
