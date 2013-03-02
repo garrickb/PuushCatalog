@@ -10,8 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 
 public class Main extends Container {
@@ -86,10 +85,26 @@ public class Main extends Container {
                 try {
                     System.out.println("Save button clicked.");
                     if (getSelectedPuush() != null) {
-                        BufferedImage bi = getSelectedPuush().getImage();
-                        File outputfile = new File(getSelectedPuush() + ".png");
-                        ImageIO.write(bi, "png", outputfile);
-                        JOptionPane.showMessageDialog(null, "Image saved to: " + outputfile.getAbsolutePath() + ".", "Clipboard", JOptionPane.INFORMATION_MESSAGE);
+                        File outputfile;
+                        switch (getSelectedPuush().getType()) {
+                            case IMAGE:
+                                String ft = getSelectedPuush().getFileType();
+                                BufferedImage bi = getSelectedPuush().getImage();
+                                outputfile = new File(getSelectedPuush() + "." + ft);
+                                ImageIO.write(bi, ft, outputfile);
+                                JOptionPane.showMessageDialog(null, "Image saved to: " + outputfile.getAbsolutePath() + ".", "Image Saved", JOptionPane.INFORMATION_MESSAGE);
+                                break;
+                            case TEXT:
+                                PrintWriter out = new PrintWriter(getSelectedPuush().getName() + ".txt");
+                                BufferedReader in = new BufferedReader(new InputStreamReader(getSelectedPuush().getURL().openStream()));
+                                String inputLine;
+                                while ((inputLine = in.readLine()) != null)
+                                    out.println(inputLine);
+                                in.close();
+                                out.close();
+                                JOptionPane.showMessageDialog(null, "Text saved as " + getSelectedPuush() + ".txt.", "Text Saved", JOptionPane.INFORMATION_MESSAGE);
+                                break;
+                        }
                     }
                 } catch (Exception e2) {
                     e2.printStackTrace();
@@ -114,7 +129,7 @@ public class Main extends Container {
                             System.out.println("ERROR: Data was null.");
                             return;
                         }
-                        saveButton.setText("Save " + getSelectedPuush().getURL().toString());
+                        saveButton.setText("Save " + getSelectedPuush().getURL().toString() + "." + getSelectedPuush().getFileType());
                     } catch (Exception e1) {
                         e1.printStackTrace();
                         System.out.println("ERROR: Could not retrieve data.");

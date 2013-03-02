@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -178,6 +179,13 @@ class Puush extends PuushURL {
             return Type.TEXT;
         else
             return Type.NULL;
+    }
+
+    public String getFileType() throws IOException {
+        HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
+        content.setRequestMethod("HEAD");
+        String type = content.getContentType();
+        return type.split("/")[1];
     }
 
     public enum Type {
