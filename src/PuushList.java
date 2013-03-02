@@ -11,10 +11,20 @@ public class PuushList extends ArrayList<Puush> {
         }
     }
 
+    public PuushList() {}
+
     public boolean add(Puush p)
     {
         super.add(p);
         return false;
+    }
+
+    public String toString()
+    {
+        String retStr = "PuushList: ";
+        for(Object pu: super.toArray())
+            retStr += pu.toString() + ", ";
+        return retStr;
     }
 
 }

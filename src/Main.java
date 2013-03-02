@@ -23,14 +23,15 @@ public class Main extends Container {
     private static PuushList pl;
 
     public static void main(String[] args) throws MalformedURLException {
-        int fetchNum = 5;
+        int fetchNum = 1000;
         Main m = new Main();
         JFrame frame = new JFrame("Main");
         frame.setContentPane(m.panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        Puush starter = new Puush("abcdE");
+        Puush starter = new Puush("aBcD23");
+        Puush starter2 = starter.getNext();
         pl = new PuushList(starter, fetchNum);
 
         m.refresh();
