@@ -52,11 +52,11 @@ public class PuushURL {
 
     public static String encode(int[] ints)
     {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for(int i : ints)  {
-            s += encode(i);
+            s.append(encode(i));
         }
-        return s;
+        return s.toString();
     }
 
     private static char encode(int i)
@@ -75,7 +75,7 @@ public class PuushURL {
         u,v,w,x,y,z,
         A,B,C,D,E,F,G,H,I,J,
         K,L,M,N,O,P,Q,R,S,T,
-        U,V,W,X,Y,Z;
+        U,V,W,X,Y,Z
     }
 
     public String toString()
