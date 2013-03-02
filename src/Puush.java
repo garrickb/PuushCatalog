@@ -1,8 +1,11 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 class Puush extends PuushURL {
 
@@ -43,6 +46,17 @@ class Puush extends PuushURL {
         panel.add(picLabel);
             System.out.println(icon.getDescription());
         return panel;
+    }
+
+    public boolean isExisting() throws IOException {
+        try{
+        URL url = getURL();
+        BufferedReader in = new BufferedReader(
+        new InputStreamReader(url.openStream()));
+        int i = in.read();
+        in.close();
+        return i > 100; //It is over 100 if there is an image.
+        } catch (Exception e) { return false; }
     }
 
     public BufferedImage getImage() throws IOException {

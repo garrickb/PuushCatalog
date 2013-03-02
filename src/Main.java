@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -32,7 +33,7 @@ public class Main extends Container {
     private static int i = 0;
     private static PuushList pl;
 
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) throws IOException {
         Main m = new Main();
         JFrame frame = new JFrame("Puush Catalog");
         frame.setContentPane(m.panel1);
@@ -46,10 +47,11 @@ public class Main extends Container {
     private void refreshList()
     {
         list.setListData(pl.toArray());
-        list.setSelectedIndex(0);
+        if(list.getSelectedIndex() > 0)
+            list.setSelectedIndex(list.getSelectedIndex() - 1);
     }
 
-    private void refresh() throws MalformedURLException {
+    private void refresh() throws IOException {
         JTextField url = new JTextField(5);
         SpinnerModel sm = new SpinnerNumberModel(0, 0, 5000, 5);
         JSpinner fetchNum = new JSpinner(sm);
@@ -84,7 +86,7 @@ public class Main extends Container {
                 System.out.println("Refresh clicked.");
                 try {
                     refresh();
-                } catch (MalformedURLException e1) {
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
