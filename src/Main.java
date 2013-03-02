@@ -3,8 +3,12 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -55,8 +59,8 @@ public class Main extends Container {
 
         int result = JOptionPane.showConfirmDialog(null, myPanel,
                 "Refresh Catalog", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION && (Integer)fetchNum.getValue() > 0 && url.getText().length() > 0) {
-            pl = new PuushList(new Puush(url.getText()), (Integer)fetchNum.getValue());
+        if (result == JOptionPane.OK_OPTION && (Integer) fetchNum.getValue() > 0 && url.getText().length() > 0) {
+            pl = new PuushList(new Puush(url.getText()), (Integer) fetchNum.getValue());
             list.setListData(pl.toArray());
             list.setSelectedIndex(0);
         }
@@ -75,44 +79,68 @@ public class Main extends Container {
                 System.out.println("Refresh clicked.");
                 try {
                     refresh();
-                } catch ( MalformedURLException e1) {e1.printStackTrace(); }
+                } catch (MalformedURLException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
-                System.out.println("Save button clicked.");
-                BufferedImage bi = ((Puush)list.getSelectedValue()).getImage();
-                File outputfile = new File(((Puush) list.getSelectedValue()).getName() + ".png");
-                ImageIO.write(bi, "png", outputfile);
-                JOptionPane.showMessageDialog(null, "Image saved to: " + outputfile.getAbsolutePath() + ".");
-                } catch (Exception e2){e2.printStackTrace();};
+                try {
+                    System.out.println("Save button clicked.");
+                    BufferedImage bi = ((Puush) list.getSelectedValue()).getImage();
+                    File outputfile = new File(((Puush) list.getSelectedValue()).getName() + ".png");
+                    ImageIO.write(bi, "png", outputfile);
+                    JOptionPane.showMessageDialog(null, "Image saved to: " + outputfile.getAbsolutePath() + ".", "Clipboard", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+                ;
             }
         });
         list.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                Puush selected = (Puush)list.getSelectedValue();
-                if(selected != null && selected != lastSelected) {
+                Puush selected = (Puush) list.getSelectedValue();
+                if (selected != null && selected != lastSelected) {
                     System.out.println("Fetching: " + list.getSelectedValue());
                     try {
                         JPanel data = selected.fetchData();
-                        if(data != null) {
+                        if (data != null) {
                             imageLabel.setIcon(rescaleImage(((Puush) list.getSelectedValue()).getURL(), pictureContainer.getSize().height, pictureContainer.getSize().width));
                             revalidate();
-                        }else
+                        } else
                             System.out.println("ERROR: Data was null.");
                         saveButton.setText("Save " + getSelectedPuush().getURL().toString());
-                    } catch (IOException e1) {e1.printStackTrace();}
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
                     lastSelected = selected;
                 }
 
             }
         });
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (pl != null && list.getSelectedValue() != null) {
+                    System.out.println("Copied to clipboard.");
+                    StringSelection selection = null;
+                    try {
+                        JOptionPane.showMessageDialog(null, "Link to image put into clipboard.");
+                        selection = new StringSelection(((Puush) list.getSelectedValue()).getURL().toString());
+                    } catch (MalformedURLException e1) {
+                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(selection, selection);
+                }
+            }
+        });
     }
-    public ImageIcon rescaleImage(URL source,int maxHeight, int maxWidth)
-    {
+
+    public ImageIcon rescaleImage(URL source, int maxHeight, int maxWidth) {
         int newHeight = 0, newWidth = 0;        // Variables for the new height and width
         int priorHeight = 0, priorWidth = 0;
         BufferedImage image = null;
@@ -128,22 +156,18 @@ public class Main extends Container {
 
         sizeImage = new ImageIcon(image);
 
-        if(sizeImage != null)
-        {
+        if (sizeImage != null) {
             priorHeight = sizeImage.getIconHeight();
             priorWidth = sizeImage.getIconWidth();
         }
 
         // Calculate the correct new height and width
-        if((float)priorHeight/(float)priorWidth > (float)maxHeight/(float)maxWidth)
-        {
+        if ((float) priorHeight / (float) priorWidth > (float) maxHeight / (float) maxWidth) {
             newHeight = maxHeight;
-            newWidth = (int)(((float)priorWidth/(float)priorHeight)*(float)newHeight);
-        }
-        else
-        {
+            newWidth = (int) (((float) priorWidth / (float) priorHeight) * (float) newHeight);
+        } else {
             newWidth = maxWidth;
-            newHeight = (int)(((float)priorHeight/(float)priorWidth)*(float)newWidth);
+            newHeight = (int) (((float) priorHeight / (float) priorWidth) * (float) newWidth);
         }
 
 
@@ -161,6 +185,7 @@ public class Main extends Container {
         // 3. Convert the buffered image into an ImageIcon for return
         return (new ImageIcon(resizedImg));
     }
+
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
