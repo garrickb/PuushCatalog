@@ -53,12 +53,13 @@ class Puush extends PuushURL {
                 picLabel = new JLabel(icon);
                 picLabel.setIcon(rescaleImage(getURL(), dimension.height, dimension.width));
             } else if (type.contains("text")) {
-                String text = "";
+                String text = "<html>";
                 BufferedReader in = new BufferedReader(new InputStreamReader(getURL().openStream()));
                 String inputLine;
                 while ((inputLine = in.readLine()) != null)
-                    text += inputLine;
+                    text += "<br>"+inputLine;
                 in.close();
+                text+="</html>";
                 picLabel = new JLabel(text);
             }
             return picLabel;
