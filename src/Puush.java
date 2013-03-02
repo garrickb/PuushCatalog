@@ -1,16 +1,23 @@
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 class Puush extends PuushURL {
 
-    public Puush(String url) throws MalformedURLException {
+    public Puush(String url) throws MalformedURLException
+    {
         super(url);
     }
 
-    public Puush(int[] url) throws MalformedURLException {
+    public Puush(int[] url) throws MalformedURLException
+    {
         super(url);
     }
 
-    public Puush getNext() throws MalformedURLException {
+    public Puush getNext() throws MalformedURLException
+    {
         int[] ID = getID();
         ID[ID.length - 1]++;
         for(int i = ID.length - 1; i >= 0; i--)
@@ -27,6 +34,17 @@ class Puush extends PuushURL {
 
             }
         return new Puush(ID);
+    }
+
+    public JPanel fetchData() throws IOException {
+        JPanel panel = new JPanel();
+        JLabel picLabel = new JLabel(new ImageIcon( getImage() ));
+        panel.add(picLabel);
+        return panel;
+    }
+
+    public BufferedImage getImage() throws IOException {
+        return  ImageIO.read(this.getURL());
     }
 
 }

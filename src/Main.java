@@ -1,10 +1,15 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +24,8 @@ public class Main extends Container {
     private JList list;
     private JButton refreshButton;
     private JPanel pictureContainer;
+    private JLabel imageLabel;
+    private JPanel imagePanel;
     private static int i = 0;
     private static PuushList pl;
 
@@ -35,7 +42,7 @@ public class Main extends Container {
 
     private void refresh() throws MalformedURLException {
         JTextField url = new JTextField(5);
-        SpinnerModel sm = new SpinnerNumberModel(0, 0, 1000, 5);
+        SpinnerModel sm = new SpinnerNumberModel(0, 0, 5000, 5);
         JSpinner fetchNum = new JSpinner(sm);
         fetchNum.setPreferredSize(new Dimension(50, 22));
 
@@ -48,7 +55,7 @@ public class Main extends Container {
 
         int result = JOptionPane.showConfirmDialog(null, myPanel,
                 "Refresh Catalog", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION && (Integer)fetchNum.getValue() >= 0) {
+        if (result == JOptionPane.OK_OPTION && (Integer)fetchNum.getValue() > 0 && url.getText().length() > 0) {
             pl = new PuushList(new Puush(url.getText()), (Integer)fetchNum.getValue());
             list.setListData(pl.toArray());
             list.setSelectedIndex(0);
@@ -59,6 +66,8 @@ public class Main extends Container {
         return (Puush) list.getSelectedValue();
     }
 
+    private Puush lastSelected = null;
+
     public Main() {
         refreshButton.addActionListener(new ActionListener() {
             @Override
@@ -66,32 +75,92 @@ public class Main extends Container {
                 System.out.println("Refresh clicked.");
                 try {
                     refresh();
-                } catch (MalformedURLException e1) {
-                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
-        });
-        pictureBeHereButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Picture clicked.");
+                } catch ( MalformedURLException e1) {e1.printStackTrace(); }
             }
         });
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                try{
                 System.out.println("Save button clicked.");
+                BufferedImage bi = ((Puush)list.getSelectedValue()).getImage();
+                File outputfile = new File(((Puush) list.getSelectedValue()).getName() + ".png");
+                ImageIO.write(bi, "png", outputfile);
+                JOptionPane.showMessageDialog(null, "Image saved to: " + outputfile.getAbsolutePath() + ".");
+                } catch (Exception e2){e2.printStackTrace();};
             }
         });
         list.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                System.out.println("Selected: " + list.getSelectedValue());
-                saveButton.setText("Save " + getSelectedPuush());
+                Puush selected = (Puush)list.getSelectedValue();
+                if(selected != null && selected != lastSelected) {
+                    System.out.println("Fetching: " + list.getSelectedValue());
+                    try {
+                        JPanel data = selected.fetchData();
+                        if(data != null) {
+                            imageLabel.setIcon(rescaleImage(((Puush) list.getSelectedValue()).getURL(), pictureContainer.getSize().height, pictureContainer.getSize().width));
+                            revalidate();
+                        }else
+                            System.out.println("ERROR: Data was null.");
+                        saveButton.setText("Save " + getSelectedPuush().getURL().toString());
+                    } catch (IOException e1) {e1.printStackTrace();}
+                    lastSelected = selected;
+                }
+
             }
         });
     }
+    public ImageIcon rescaleImage(URL source,int maxHeight, int maxWidth)
+    {
+        int newHeight = 0, newWidth = 0;        // Variables for the new height and width
+        int priorHeight = 0, priorWidth = 0;
+        BufferedImage image = null;
+        ImageIcon sizeImage;
 
+        try {
+            image = ImageIO.read(source);        // get the image
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            System.out.println("Picture upload attempted & failed");
+        }
+
+        sizeImage = new ImageIcon(image);
+
+        if(sizeImage != null)
+        {
+            priorHeight = sizeImage.getIconHeight();
+            priorWidth = sizeImage.getIconWidth();
+        }
+
+        // Calculate the correct new height and width
+        if((float)priorHeight/(float)priorWidth > (float)maxHeight/(float)maxWidth)
+        {
+            newHeight = maxHeight;
+            newWidth = (int)(((float)priorWidth/(float)priorHeight)*(float)newHeight);
+        }
+        else
+        {
+            newWidth = maxWidth;
+            newHeight = (int)(((float)priorHeight/(float)priorWidth)*(float)newWidth);
+        }
+
+
+        // Resize the image
+
+        // 1. Create a new Buffered Image and Graphic2D object
+        BufferedImage resizedImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+
+        // 2. Use the Graphic object to draw a new image to the image in the buffer
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.drawImage(image, 0, 0, newWidth, newHeight, null);
+        g2.dispose();
+
+        // 3. Convert the buffered image into an ImageIcon for return
+        return (new ImageIcon(resizedImg));
+    }
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
 // >>> IMPORTANT!! <<<
