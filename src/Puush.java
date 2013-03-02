@@ -44,23 +44,30 @@ class Puush extends PuushURL {
         HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
         content.setRequestMethod("HEAD");
         int size = content.getContentLength();
-        String type = content.getContentType();
+        Type type = getType();
         JLabel picLabel = null;
+        System.out.println("TYPE: " + type);
         System.out.println("SIZE: " + size);
         if (getSize() < 150000) {
-            if (type.contains("image")) {
-                ImageIcon icon = new ImageIcon(getImage());
-                picLabel = new JLabel(icon);
-                picLabel.setIcon(rescaleImage(getURL(), dimension.height, dimension.width));
-            } else if (type.contains("text")) {
-                String text = "<html>";
-                BufferedReader in = new BufferedReader(new InputStreamReader(getURL().openStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null)
-                    text += "<br>"+inputLine;
-                in.close();
-                text+="</html>";
-                picLabel = new JLabel(text);
+            switch(type) {
+                case IMAGE:
+                    ImageIcon icon = new ImageIcon(getImage());
+                    picLabel = new JLabel(icon);
+                    picLabel.setIcon(rescaleImage(getURL(), dimension.height, dimension.width));
+                    break;
+                case TEXT:
+                    String text = "<html>";
+                    BufferedReader in = new BufferedReader(new InputStreamReader(getURL().openStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null)
+                        text += "<br>"+inputLine;
+                    in.close();
+                    text+="</html>";
+                    picLabel = new JLabel(text);
+                    break;
+                default:
+                    picLabel = new JLabel("Type not supported.");
+                    break;
             }
             return picLabel;
         } else {
@@ -115,12 +122,22 @@ class Puush extends PuushURL {
         return (new ImageIcon(resizedImg));
     }
 
+    private String getDate(HttpURLConnection content) throws IOException {
+        Date date = new Date(content.getDate());
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/DD/YYYY h:mm:ss a");
+        return sdf.format(date).toUpperCase();
+    }
+
     public String getDate() throws IOException {
         HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
         content.setRequestMethod("HEAD");
         Date date = new Date(content.getDate());
         SimpleDateFormat sdf = new SimpleDateFormat("MM/DD/YYYY h:mm:ss a");
         return sdf.format(date).toUpperCase();
+    }
+
+    private int getSize(HttpURLConnection content) throws IOException {
+        return content.getContentLength();
     }
 
     public int getSize() throws IOException {
@@ -139,6 +156,34 @@ class Puush extends PuushURL {
 
     public BufferedImage getImage() throws IOException {
         return ImageIO.read(this.getURL());
+    }
+
+    private Type getType(HttpURLConnection content) throws IOException {
+        String type = content.getContentType();
+        if(type.contains("image"))
+            return Type.IMAGE;
+        else if(type.contains("text"))
+            return Type.TEXT;
+        else
+            return Type.NULL;
+    }
+
+    public Type getType() throws IOException {
+        HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
+        content.setRequestMethod("HEAD");
+        String type = content.getContentType();
+        if(type.contains("image"))
+            return Type.IMAGE;
+        else if(type.contains("text"))
+            return Type.TEXT;
+        else
+            return Type.NULL;
+    }
+
+    public enum Type {
+        NULL,
+        IMAGE,
+        TEXT
     }
 
 }
