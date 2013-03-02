@@ -37,15 +37,12 @@ class Puush extends PuushURL {
     }
 
     public JPanel fetchData() throws IOException {
-        try {
         JPanel panel = new JPanel();
         ImageIcon icon = new ImageIcon( getImage() );
         JLabel picLabel = new JLabel(icon);
         panel.add(picLabel);
             System.out.println(icon.getDescription());
         return panel;
-        } catch(Exception e) {}
-        return null;
     }
 
     public BufferedImage getImage() throws IOException {

@@ -11,7 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -42,6 +41,12 @@ public class Main extends Container {
         frame.setVisible(true);
 
         pl = new PuushList(null, 0);
+    }
+
+    private void refreshList()
+    {
+        list.setListData(pl.toArray());
+        list.setSelectedIndex(0);
     }
 
     private void refresh() throws MalformedURLException {
@@ -107,14 +112,19 @@ public class Main extends Container {
                     System.out.println("Fetching: " + list.getSelectedValue());
                     try {
                         JPanel data = selected.fetchData();
-                        if (data != null) {
+                        if (!data.equals(null)) {
                             imageLabel.setIcon(rescaleImage(((Puush) list.getSelectedValue()).getURL(), pictureContainer.getSize().height, pictureContainer.getSize().width));
                             revalidate();
-                        } else
+                        } else {
                             System.out.println("ERROR: Data was null.");
+                            return;
+                        }
                         saveButton.setText("Save " + getSelectedPuush().getURL().toString());
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    } catch (Exception e1) {
+                        System.out.println("ERROR: Could not retrieve data.");
+                        pl.remove(getSelectedPuush());
+                        refreshList();
+                        //e1.printStackTrace();
                     }
                     lastSelected = selected;
                 }
