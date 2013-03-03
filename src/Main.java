@@ -128,7 +128,7 @@ public class Main extends Container {
                             System.out.println("ERROR: Data was null.");
                             return;
                         }
-                        saveButton.setText("Save " + getSelectedPuush().getURL().toString() + "." + getSelectedPuush().getFileType());
+                         saveButton.setText("Save " + getSelectedPuush().getURL().toString() + "." + getSelectedPuush().getFileType());
                     } catch (Exception e1) {
                         e1.printStackTrace();
                         System.out.println("ERROR: Could not retrieve data.");

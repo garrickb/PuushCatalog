@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 class Puush extends PuushURL {
@@ -46,69 +43,70 @@ class Puush extends PuushURL {
     }
 
     public JLabel fetchData(Dimension dimension) throws IOException {
-        if(data.containsKey(getName())) {   //Check the hashmap for an instance of the data
+        if (data.containsKey(getName())) {   //Check the hashmap for an instance of the data
             System.out.println("Data already exists!");
             JLabel label;
-            switch(getType()) {
+            switch (getType()) {
                 case IMAGE:
                     label = new JLabel();
-                    label.setIcon(rescaleImage((BufferedImage)data.get(getName()), dimension.height, dimension.width));
+                    label.setIcon(rescaleImage((BufferedImage) data.get(getName()), dimension.height, dimension.width));
                     return label;
                 case TEXT:
                     label = new JLabel();
-                    label.setText((String)data.get(getName()));
+                    label.setText((String) data.get(getName()));
                     return label;
             }
         }
 
-        if(data.size() >= 10)  { //Only keeps data for last 10 accessed items
+        if (data.size() >= 10) { //Only keeps data for last 10 accessed items
             Object key = data.keySet().iterator().next();
             data.remove(key);
         }
 
         HttpURLConnection content = (HttpURLConnection) getURL().openConnection(); //No data found, get the data from webpage
+        long start;
         content.setRequestMethod("HEAD");
-        int size = content.getContentLength();
-        Type type = getType();
         JLabel picLabel = null;
-        System.out.println("TYPE: " + type);
-        System.out.println("SIZE: " + size);
-        if (getSize() < 100000000) {
-            switch(type) {
-                case IMAGE:
-                    BufferedImage im = getImage();
-                    picLabel = new JLabel();
-                    data.put(getName(), im);
-                    picLabel.setIcon(rescaleImage(im, dimension.height, dimension.width));
+        Type type = getType(content);
+
+        start = System.currentTimeMillis();
+        switch (type) {
+            case IMAGE:
+                if(getFileType().toLowerCase().equals("gif")) {
+                    picLabel = new JLabel("GIFs are not supported.");
                     break;
-                case TEXT:
-                    String text = "<html>";
-                    BufferedReader in = new BufferedReader(new InputStreamReader(getURL().openStream()));
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null)
-                        text += "<br>"+inputLine;
-                    in.close();
-                    text+="</html>";
-                    data.put(getName(), text);
-                    picLabel = new JLabel(text);
-                    break;
-                default:
-                    picLabel = new JLabel("Type not supported.");
-                    break;
-            }
-            return picLabel;
-        } else {
-            System.out.println("FILE TOO LARGE");
-            return new JLabel("File is too large: " + size + "kb");
+                }
+                BufferedImage im = getImage();
+                picLabel = new JLabel();
+                data.put(getName(), im);
+                picLabel.setIcon(rescaleImage(im, dimension.height, dimension.width));
+                //picLabel.setIcon(new ImageIcon(im));
+                break;
+            case TEXT:
+                String text = "<html>";
+                BufferedReader in = new BufferedReader(new InputStreamReader(getURL().openStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null)
+                    text += "<br>" + inputLine;
+                in.close();
+                text += "</html>";
+                data.put(getName(), text);
+                picLabel = new JLabel(text);
+                break;
+            default:
+                picLabel = new JLabel("Type not supported.");
+                break;
         }
+        System.out.println("TOOK: " + (System.currentTimeMillis() - start) + " ms");
+
+        return picLabel;
     }
 
     public static ImageIcon rescaleImage(BufferedImage im, int maxHeight, int maxWidth) {
         int newHeight = 0, newWidth = 0;
         int priorHeight = 0, priorWidth = 0;
-        BufferedImage image = im;
         ImageIcon sizeImage;
-        sizeImage = new ImageIcon(image);
+        sizeImage = new ImageIcon(im);
 
         if (sizeImage != null) {
             priorHeight = sizeImage.getIconHeight();
@@ -127,7 +125,7 @@ class Puush extends PuushURL {
         Graphics2D g2 = resizedImg.createGraphics();
 
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.drawImage(image, 0, 0, newWidth, newHeight, null);
+        g2.drawImage(im, 0, 0, newWidth, newHeight, null);
         g2.dispose();
 
         return (new ImageIcon(resizedImg));
@@ -171,9 +169,9 @@ class Puush extends PuushURL {
 
     private Type getType(HttpURLConnection content) throws IOException {
         String type = content.getContentType();
-        if(type.contains("image"))
+        if (type.contains("image"))
             return Type.IMAGE;
-        else if(type.contains("text"))
+        else if (type.contains("text"))
             return Type.TEXT;
         else
             return Type.NULL;
@@ -183,9 +181,9 @@ class Puush extends PuushURL {
         HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
         content.setRequestMethod("HEAD");
         String type = content.getContentType();
-        if(type.contains("image"))
+        if (type.contains("image"))
             return Type.IMAGE;
-        else if(type.contains("text"))
+        else if (type.contains("text"))
             return Type.TEXT;
         else
             return Type.NULL;
