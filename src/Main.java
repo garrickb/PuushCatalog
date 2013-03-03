@@ -119,7 +119,6 @@ public class Main extends Container {
                 if (selected != null && selected != lastSelected) {
                     System.out.println("Fetching: " + list.getSelectedValue());
                     try {
-                        System.out.println(getSelectedPuush().getDate());
                         JLabel data = selected.fetchData(pictureContainer.getSize());
                         if (!data.equals(null)) {
                             imageLabel.setText(data.getText());

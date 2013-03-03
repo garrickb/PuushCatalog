@@ -11,8 +11,12 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 class Puush extends PuushURL {
+
+    public static LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
     public Puush(String url) throws MalformedURLException {
         super(url);
@@ -42,19 +46,40 @@ class Puush extends PuushURL {
     }
 
     public JLabel fetchData(Dimension dimension) throws IOException {
-        HttpURLConnection content = (HttpURLConnection) getURL().openConnection();
+        if(data.containsKey(getName())) {   //Check the hashmap for an instance of the data
+            System.out.println("Data already exists!");
+            JLabel label;
+            switch(getType()) {
+                case IMAGE:
+                    label = new JLabel();
+                    label.setIcon(rescaleImage((BufferedImage)data.get(getName()), dimension.height, dimension.width));
+                    return label;
+                case TEXT:
+                    label = new JLabel();
+                    label.setText((String)data.get(getName()));
+                    return label;
+            }
+        }
+
+        if(data.size() >= 10)  { //Only keeps data for last 10 accessed items
+            Object key = data.keySet().iterator().next();
+            data.remove(key);
+        }
+
+        HttpURLConnection content = (HttpURLConnection) getURL().openConnection(); //No data found, get the data from webpage
         content.setRequestMethod("HEAD");
         int size = content.getContentLength();
         Type type = getType();
         JLabel picLabel = null;
         System.out.println("TYPE: " + type);
         System.out.println("SIZE: " + size);
-        if (getSize() < 150000) {
+        if (getSize() < 100000000) {
             switch(type) {
                 case IMAGE:
-                    ImageIcon icon = new ImageIcon(getImage());
-                    picLabel = new JLabel(icon);
-                    picLabel.setIcon(rescaleImage(getURL(), dimension.height, dimension.width));
+                    BufferedImage im = getImage();
+                    picLabel = new JLabel();
+                    data.put(getName(), im);
+                    picLabel.setIcon(rescaleImage(im, dimension.height, dimension.width));
                     break;
                 case TEXT:
                     String text = "<html>";
@@ -64,6 +89,7 @@ class Puush extends PuushURL {
                         text += "<br>"+inputLine;
                     in.close();
                     text+="</html>";
+                    data.put(getName(), text);
                     picLabel = new JLabel(text);
                     break;
                 default:
@@ -77,20 +103,11 @@ class Puush extends PuushURL {
         }
     }
 
-    public ImageIcon rescaleImage(URL source, int maxHeight, int maxWidth) {
-        int newHeight = 0, newWidth = 0;        // Variables for the new height and width
+    public static ImageIcon rescaleImage(BufferedImage im, int maxHeight, int maxWidth) {
+        int newHeight = 0, newWidth = 0;
         int priorHeight = 0, priorWidth = 0;
-        BufferedImage image = null;
+        BufferedImage image = im;
         ImageIcon sizeImage;
-
-        try {
-            image = ImageIO.read(source);        // get the image
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            System.out.println("Picture upload attempted & failed");
-        }
-
         sizeImage = new ImageIcon(image);
 
         if (sizeImage != null) {
@@ -98,7 +115,6 @@ class Puush extends PuushURL {
             priorWidth = sizeImage.getIconWidth();
         }
 
-        // Calculate the correct new height and width
         if ((float) priorHeight / (float) priorWidth > (float) maxHeight / (float) maxWidth) {
             newHeight = maxHeight;
             newWidth = (int) (((float) priorWidth / (float) priorHeight) * (float) newHeight);
@@ -107,19 +123,13 @@ class Puush extends PuushURL {
             newHeight = (int) (((float) priorHeight / (float) priorWidth) * (float) newWidth);
         }
 
-
-        // Resize the image
-
-        // 1. Create a new Buffered Image and Graphic2D object
         BufferedImage resizedImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = resizedImg.createGraphics();
 
-        // 2. Use the Graphic object to draw a new image to the image in the buffer
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2.drawImage(image, 0, 0, newWidth, newHeight, null);
         g2.dispose();
 
-        // 3. Convert the buffered image into an ImageIcon for return
         return (new ImageIcon(resizedImg));
     }
 
